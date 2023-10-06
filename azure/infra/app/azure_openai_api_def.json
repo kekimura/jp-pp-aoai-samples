@@ -145,7 +145,7 @@
                   "max_tokens": {
                     "description": "The maximum number of tokens allowed for the generated answer. By default, the number of tokens the model can return will be (4096 - prompt tokens).",
                     "type": "integer",
-                    "default": "inf"
+                    "format":"int32"
                   },
                   "presence_penalty": {
                     "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.",
@@ -205,7 +205,7 @@
                     },
                     "created": {
                       "type": "integer",
-                      "format": "unixtime"
+                      "format": "int32"
                     },
                     "model": {
                       "type": "string"
@@ -216,7 +216,8 @@
                         "type": "object",
                         "properties": {
                           "index": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int32"
                           },
                           "message": {
                             "type": "object",
@@ -250,13 +251,16 @@
                       "type": "object",
                       "properties": {
                         "prompt_tokens": {
-                          "type": "integer"
+                          "type": "integer",
+                          "format": "int32"
                         },
                         "completion_tokens": {
-                          "type": "integer"
+                          "type": "integer",
+                          "format": "int32"
                         },
                         "total_tokens": {
-                          "type": "integer"
+                          "type": "integer",
+                          "format": "int32"
                         }
                       },
                       "required": [
