@@ -16,7 +16,7 @@
         <set-backend-service base-url="{backend-url}" />
         <cors allow-credentials="false">
             <allowed-origins>
-                <origin>{origin}</origin>
+                {origins}
             </allowed-origins>
             <allowed-methods>
                 <method>GET</method>
@@ -27,7 +27,6 @@
                 <header>Authorization</header>
                 <header>Ocp-Apim-Subscription-Key</header>
                 <header>Origin</header>
-                <header>Hoge</header>
             </allowed-headers>
         </cors>
         <validate-azure-ad-token tenant-id="{tenant-id}" header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="認証に失敗しました" output-token-variable-name="jwt-variables">

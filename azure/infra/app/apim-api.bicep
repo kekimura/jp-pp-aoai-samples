@@ -18,7 +18,7 @@ param apiDescription string
 param apiPath string
 
 @description('Absolute URL of the web frontend')
-param corsOriginUrl string
+param corsOriginUrls array
 param audienceAppId string = 'api://xxappidsamplexx'
 param scopeName string = 'chat'
 param apiBackendUrl string = 'https://subdomain.openai.azure.com/openai'
@@ -27,8 +27,8 @@ param tenantId string = 'xxtenantidsamplexx'
 // If you want to use App Service easy auth, please use 'apim-api-policy-aad.xml'
 //var policy_template = loadTextContent('./apim-api-policy.xml')
 var policy_template = loadTextContent('./apim-api-policy-aad.xml')
-
-var policy_template2 = replace(policy_template ,'{origin}', corsOriginUrl)
+var corsOriginUrlsXML = join(map(corsOriginUrls, url => '<origin>${url}</origin>'), '\n')
+var policy_template2 = replace(policy_template ,'{origins}', corsOriginUrlsXML)
 var policy_template3 = replace(policy_template2 ,'{aud-app-id}', audienceAppId)
 var policy_template4 = replace(policy_template3 ,'{scope-name}', scopeName)
 var policy_template5 = replace(policy_template4 ,'{backend-url}', apiBackendUrl)

@@ -25,6 +25,11 @@ param resourceGroupName string = ''
 param apimServiceName string = ''
 param apimSkuName string = 'Standard'
 
+param keyVaultName string = ''
+@description('Azure ADに登録されたアプリのクライアントシークレットを指定してください')
+@secure()
+param clientSecret string = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
 // Please provide these parameters if you want to use an existing Azure OpenAI resource
 param openAiServiceName string = ''
 param openAiResourceGroupName string = ''
@@ -37,8 +42,8 @@ param chatGptDeploymentName string = 'chatgpt'
 param chatGptModelName string = 'gpt-35-turbo'
 
 // params for api policy settings
-@description('CORSオリジンとして許可するドメインを指定してください(*でも可)')
-param corsOriginUrl string = '*'
+@description('CORSオリジンとして許可するドメインを配列形式で指定してください(*でも可)')
+param corsOriginUrls array = [ '*' ]
 @description('認可対象となるAzure ADに登録されたアプリのIDを指定してください（例: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx）')
 param audienceAppId string = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 @description('認可対象となるをAzure ADに登録されたアプリのスコープ名を指定してください')
@@ -170,13 +175,37 @@ module apimApi './app/apim-api.bicep' = {
     apiPath: 'api'
 
     //API Policy parameters
-    corsOriginUrl: corsOriginUrl
+    corsOriginUrls: corsOriginUrls
     audienceAppId: audienceAppId
     scopeName: scopeName
     apiBackendUrl: 'https://${openAi.outputs.name}.openai.azure.com/openai'
     tenantId: tenantId
   }
 }
+
+module keyVault './core/security/keyvault.bicep' = {
+  name: 'keyvault-deployment'
+  scope: rg
+  params: {
+    name: !empty(keyVaultName) ? keyVaultName : '${abbrs.keyVaultVaults}${resourceToken}'
+    location: location
+    tags: tags
+  }
+}
+
+module secret './core/security/keyvault-secret.bicep' = {
+  name: 'secret-deployment'
+  scope: rg
+  dependsOn: [
+    keyVault
+  ]
+  params: {
+    name: 'client-secret'
+    keyVaultName: keyVault.outputs.name
+    secretValue: clientSecret
+  }
+}
+
 // next action
 // 1.ポリシーを簡略化する
 // 2.VNet統合する
@@ -186,3 +215,5 @@ output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applica
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output REACT_APP_APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
+output CLIENT_SECRET_KEY_VAULT_NAME string = keyVault.outputs.name
+output CLIENT_SECRET_KEY_VAULT_SECRET_NAME string = secret.outputs.name
